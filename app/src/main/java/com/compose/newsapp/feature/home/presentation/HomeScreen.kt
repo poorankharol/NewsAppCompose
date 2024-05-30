@@ -1,8 +1,10 @@
 package com.compose.newsapp.feature.home.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,24 +29,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.rounded.ArrowForward
-import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -63,20 +65,19 @@ import com.compose.newsapp.feature.home.presentation.viewmodel.HomeViewModel
 import com.compose.newsapp.utils.Utils
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navHostController: NavHostController) {
     val viewModel = hiltViewModel<HomeViewModel>()
     val newsTopicState by viewModel.newsTopicState.collectAsState()
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
 
-        item { TopBar() }
+        item { TopBar(navHostController) }
         item {
             Column {
                 NewsLabel()
                 Spacer(modifier = Modifier.height(15.dp))
-                LoadLatestNews(viewModel)
+                LoadLatestNews(viewModel, navHostController)
             }
         }
 
@@ -128,35 +129,54 @@ private fun NewsLabel() {
 }
 
 @Composable
-private fun TopBar() {
-    var searchText by remember {
-        mutableStateOf("")
-    }
+private fun TopBar(navHostController: NavHostController) {
+
     Row(
         Modifier
             .fillMaxWidth()
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.SpaceAround,
     ) {
-        OutlinedTextField(value = searchText, onValueChange = {
-            searchText = it
-        }, shape = RoundedCornerShape(30.dp), trailingIcon = {
-            Icon(imageVector = Icons.Rounded.Search, "", tint = Color.Gray)
-        }, placeholder = {
-            Text(text = "Search Here")
-        }, colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = Color.Gray,
-            unfocusedBorderColor = Color.Gray,
-        )
-        )
+
+        Card(
+            border = BorderStroke(1.dp, Color.Gray),
+            colors = CardDefaults.cardColors(containerColor = White),
+            modifier = Modifier
+                .weight(1f)
+                .height(50.dp)
+                .clickable {
+                    navHostController.navigate("search")
+                },
+            shape = RoundedCornerShape(40.dp)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Search Here",
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp)
+                )
+                Icon(
+                    imageVector = Icons.Outlined.Notifications,
+                    contentDescription = "",
+                    tint = Color.Gray
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+
         Box(
             modifier = Modifier
                 .clip(
                     RoundedCornerShape(30.dp)
                 )
                 .background(Color.Red)
-                .padding(14.dp)
+                .padding(12.dp)
         ) {
             Icon(
                 imageVector = Icons.Outlined.Notifications,
@@ -189,8 +209,7 @@ fun LoadNewsTopic(viewModel: HomeViewModel) {
                 Modifier
                     .fillMaxWidth()
 
-                    .padding(12.dp),
-                userScrollEnabled = false
+                    .padding(12.dp), userScrollEnabled = false
             ) {
                 items(newsTopicState.articles) { article ->
                     DisplayNewsTopic(article)
@@ -229,8 +248,7 @@ fun DisplayNewsTopic(article: Article) {
             )
             Spacer(modifier = Modifier.weight(1f))
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     article.source?.name.toString(),
@@ -269,13 +287,10 @@ fun NewsTopics(viewModel: HomeViewModel) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(30.dp))
-                    .selectable(
-                        selected = selectedIndex == index,
-                        onClick = {
-                            selectedIndex = index
-                            viewModel.getNewsTopic(item)
-                        }
-                    )
+                    .selectable(selected = selectedIndex == index, onClick = {
+                        selectedIndex = index
+                        viewModel.getNewsTopic(item)
+                    })
                     .background(
                         if (selectedIndex == index) Color.Red
                         else Color.Transparent
@@ -289,7 +304,7 @@ fun NewsTopics(viewModel: HomeViewModel) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LoadLatestNews(viewModel: HomeViewModel) {
+fun LoadLatestNews(viewModel: HomeViewModel, navHostController: NavHostController) {
 
     val latestNewsState by viewModel.latestNewsState.collectAsState()
 
@@ -312,7 +327,7 @@ fun LoadLatestNews(viewModel: HomeViewModel) {
                 pageSpacing = 10.dp
             ) { page ->
                 // Our page content
-                DisplayArticle(article = latestNewsState.articles[page])
+                DisplayArticle(article = latestNewsState.articles[page], navHostController)
             }
         }
 
@@ -325,11 +340,14 @@ fun LoadLatestNews(viewModel: HomeViewModel) {
 }
 
 @Composable
-fun DisplayArticle(article: Article) {
+fun DisplayArticle(article: Article, navHostController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp),
+            .height(250.dp)
+            .clickable {
+                navHostController.navigate("detail/$article")
+            },
         contentAlignment = Alignment.Center,
     ) {
         FetchImageFromUrl(imageUrl = article.urlToImage.toString())
@@ -364,8 +382,7 @@ fun FetchImageFromUrl(imageUrl: String) {
     val model = ImageRequest.Builder(LocalContext.current).data(imageUrl).size(250).build()
     val imageState = rememberAsyncImagePainter(model = model).state
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
+        modifier = Modifier.clip(RoundedCornerShape(20.dp))
     ) {
         when (imageState) {
             is AsyncImagePainter.State.Loading -> {

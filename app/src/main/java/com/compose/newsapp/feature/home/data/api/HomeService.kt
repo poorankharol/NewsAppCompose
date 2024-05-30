@@ -5,7 +5,7 @@ import com.compose.newsapp.feature.home.domain.model.NewsTopicsResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ApiService {
+interface HomeService {
 
     @GET("top-headlines")
     suspend fun getLatestNews(

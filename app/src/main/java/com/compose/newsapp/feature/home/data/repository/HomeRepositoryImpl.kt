@@ -1,6 +1,6 @@
 package com.compose.newsapp.feature.home.data.repository
 
-import com.compose.newsapp.feature.home.data.api.ApiService
+import com.compose.newsapp.feature.home.data.api.HomeService
 import com.compose.newsapp.feature.home.domain.model.Article
 import com.compose.newsapp.feature.home.domain.repository.HomeRepository
 import com.compose.newsapp.utils.API_KEY
@@ -9,13 +9,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class HomeRepositoryImpl @Inject constructor(private val apiService: ApiService) : HomeRepository {
+class HomeRepositoryImpl @Inject constructor(private val homeService: HomeService) :
+    HomeRepository {
 
     override suspend fun getLatestNews(country: String): Flow<NetworkResult<List<Article>>> {
         return flow {
             emit(NetworkResult.Loading(true))
             val response = try {
-                apiService.getLatestNews(apiKey = API_KEY, country = country)
+                homeService.getLatestNews(apiKey = API_KEY, country = country)
             } catch (e: Exception) {
                 e.printStackTrace()
                 emit(NetworkResult.Error(e.message.toString()))
@@ -34,7 +35,7 @@ class HomeRepositoryImpl @Inject constructor(private val apiService: ApiService)
         return flow {
             emit(NetworkResult.Loading(true))
             val response = try {
-                apiService.getNewsTopics(apiKey = API_KEY, q = topic)
+                homeService.getNewsTopics(apiKey = API_KEY, q = topic)
             } catch (e: Exception) {
                 e.printStackTrace()
                 emit(NetworkResult.Error(e.message.toString()))

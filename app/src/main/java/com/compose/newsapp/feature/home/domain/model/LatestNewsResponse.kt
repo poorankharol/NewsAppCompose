@@ -1,5 +1,7 @@
 package com.compose.newsapp.feature.home.domain.model
 
+import android.net.Uri
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 
 data class LatestNewsResponse(
@@ -39,7 +41,9 @@ data class Article(
 
     @field:SerializedName("content")
     val content: String? = null,
-)
+) {
+    override fun toString(): String = Uri.encode(Gson().toJson(this))
+}
 
 data class Source(
 
@@ -47,5 +51,8 @@ data class Source(
     val name: String? = null,
 
     @field:SerializedName("id")
-    val id: String? = null,
+    val id: String = "-1",
 )
+
+
+

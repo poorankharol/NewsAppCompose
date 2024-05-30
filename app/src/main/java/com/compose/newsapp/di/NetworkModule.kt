@@ -2,7 +2,8 @@ package com.compose.newsapp.di
 
 import android.content.Context
 import com.compose.newsapp.NewsApp
-import com.compose.newsapp.feature.home.data.api.ApiService
+import com.compose.newsapp.feature.home.data.api.HomeService
+import com.compose.newsapp.feature.home.data.api.SearchService
 import com.compose.newsapp.utils.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -63,8 +64,14 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideApiService(retrofit: Retrofit): ApiService {
-        return retrofit.create(ApiService::class.java)
+    fun provideHomeApiService(retrofit: Retrofit): HomeService {
+        return retrofit.create(HomeService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchApiService(retrofit: Retrofit): SearchService {
+        return retrofit.create(SearchService::class.java)
     }
 
 

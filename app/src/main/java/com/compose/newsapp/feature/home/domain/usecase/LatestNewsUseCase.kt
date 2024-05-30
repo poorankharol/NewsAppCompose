@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class LatestNewsUseCase @Inject constructor(private val repository: HomeRepository) {
 
-    operator fun invoke(country: String): Flow<NetworkResult<List<Article>>> = flow {
+    suspend operator fun invoke(country: String): Flow<NetworkResult<List<Article>>> = flow {
         repository.getLatestNews(country).collect { result ->
             emit(result)
         }

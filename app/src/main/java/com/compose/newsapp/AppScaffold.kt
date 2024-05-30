@@ -9,9 +9,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.compose.newsapp.common.Screens
+import com.compose.newsapp.feature.details.presentation.screen.DetailsScreen
+import com.compose.newsapp.feature.home.domain.model.Article
+import com.compose.newsapp.feature.home.domain.model.ArticleArgType
 import com.compose.newsapp.feature.home.presentation.HomeScreen
 import com.compose.newsapp.feature.search.presentation.screen.SearchScreen
+import com.google.gson.Gson
 
 @Composable
 fun AppScaffold() {
@@ -38,11 +43,20 @@ fun AppNavHost(
         modifier = modifier
     ) {
         composable(Screens.HOME.route) {
-            HomeScreen()
+            HomeScreen(navController)
         }
 
         composable(Screens.SEARCH.route) {
-            SearchScreen()
+            SearchScreen(onUpButtonClick = { navController.popBackStack() })
+        }
+
+        composable(
+            Screens.DETAIL.route,
+            arguments = listOf(navArgument("article") { type = ArticleArgType() })
+        ) { navBackStack ->
+            val article = navBackStack.arguments?.getString("article")
+                ?.let { Gson().fromJson(it, Article::class.java) }
+            DetailsScreen(article)
         }
     }
 }
