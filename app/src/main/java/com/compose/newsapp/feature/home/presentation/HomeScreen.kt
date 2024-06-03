@@ -98,7 +98,7 @@ fun HomeScreen(navHostController: NavHostController) {
 
         if (newsTopicState.articles.isNotEmpty() && !newsTopicState.isLoading) {
             items(newsTopicState.articles) { article ->
-                DisplayNewsTopic(article)
+                DisplayNewsTopic(article, navHostController)
             }
         }
 
@@ -189,48 +189,15 @@ private fun TopBar(navHostController: NavHostController) {
 }
 
 @Composable
-fun LoadNewsTopic(viewModel: HomeViewModel) {
-
-    val newsTopicState by viewModel.newsTopicState.collectAsState()
-
-    when {
-        newsTopicState.isLoading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-
-        newsTopicState.error != null -> {
-            Text(text = newsTopicState.error ?: "An unknown error occurred")
-        }
-
-        newsTopicState.articles.isNotEmpty() -> {
-            LazyColumn(
-                Modifier
-                    .fillMaxWidth()
-
-                    .padding(12.dp), userScrollEnabled = false
-            ) {
-                items(newsTopicState.articles) { article ->
-                    DisplayNewsTopic(article)
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-            }
-        }
-
-        else -> {
-            Text(text = "No articles available")
-        }
-    }
-}
-
-@Composable
-fun DisplayNewsTopic(article: Article) {
+fun DisplayNewsTopic(article: Article, navHostController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .padding(10.dp),
+            .padding(10.dp)
+            .clickable {
+                navHostController.navigate("detail/$article")
+            },
         contentAlignment = Alignment.Center,
     ) {
         FetchImageFromUrl(imageUrl = article.urlToImage.toString())

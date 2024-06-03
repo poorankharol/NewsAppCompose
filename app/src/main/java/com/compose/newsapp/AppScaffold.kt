@@ -56,7 +56,7 @@ fun AppNavHost(
         ) { navBackStack ->
             val article = navBackStack.arguments?.getString("article")
                 ?.let { Gson().fromJson(it, Article::class.java) }
-            DetailsScreen(article)
+            DetailsScreen(article, onUpButtonClick = { navController.popBackStack() })
         }
     }
 }
